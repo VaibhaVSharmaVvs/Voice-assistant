@@ -5,11 +5,17 @@ import wikipedia #pip install wikipedia
 import webbrowser
 import os
 import smtplib
+import random
+import operator
+
+
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
 # print(voices[1].id)
 engine.setProperty('voice', voices[1].id)
+newVoiceRate = 190
+engine.setProperty('rate',newVoiceRate)
 
 
 def speak(audio):
@@ -28,17 +34,18 @@ def wishMe():
     elif hour>=16 and hour<20:
         speak("Good Evening!")
     else:
-        speak("Nighty Sir!")      
+        speak("Hello Sir!")      
 
-    speak("I am nina, Your voice assistant Sir. Please tell me how may I help you")       
+    speak("I am nina,Your voice assistant Sir. Please tell me how may I help you")       
 
 def takeCommand():
     #It takes microphone input from the user and returns string output
 
     r = sr.Recognizer()
     with sr.Microphone() as source:
-        print("Listening...")
+        print("Decoding...")
         r.pause_threshold = 1
+        r.adjust_for_ambient_noise(source)
         audio = r.listen(source)
 
     try:
@@ -47,8 +54,8 @@ def takeCommand():
         print(f"User said: {query}\n")
 
     except Exception as e:
-        # print(e)    
-        print("Say that again please...")  
+        print(e)    
+        speak("Pardon please...")  
         return "None"
     return query
 
@@ -93,7 +100,13 @@ if __name__ == "__main__":
             codeblocksPath = "C:\\Users\\VAIBHAV SHARMA\\Desktop\\Programing\\CodeBlocks\\codeblocks.exe"
             os.startfile(codeblocksPath)
 
+        elif 'open cuims' in query:
+            speak("opening cuims for you...")
+            webbrowser.open("https://uims.cuchd.in/uims/")
 
+        elif 'open blackboard' in query:
+            speak("opening blackboard for you...")
+            webbrowser.open("https://cuchd.blackboard.com/")
 
         elif 'the time' in query:
             strTime = datetime.datetime.now().strftime("%H:%M:%S")    
@@ -114,4 +127,80 @@ if __name__ == "__main__":
                 speak("Email has been sent!")
             except Exception as e:
                 print(e)
-                speak("Sorry sir. I am not able to send this email")   
+                speak("Sorry sir. I am not able to send this email")  
+
+        elif 'play game' in query:
+              speak("7 up Game You have to guess if the sum of two dice is below seven above seven or if lucky seven")
+              max=6
+              min=1
+              account=0
+              speak("enter your bidding amount")
+              credit=takeCommand()
+              speak("choice 1 seven Up")
+              speak("choice 2 Equals seven")
+              speak("choice 3 seven Down")
+                    
+              a=random.randint(min,max)
+              b=random.randint(min,max)
+              c=a+b
+              speak("Enter Your Choice")
+              ch = takeCommand()
+              print("Dice is rolling...")
+              print("The answer is %d",c)
+              if(ch==1):
+                 if(c>7):
+                     account=account+credit*2
+                     speak("Congrats! You won\n")
+                 else:
+                     account=account-credit
+                     speak("Sorry You Lose\n")
+
+              elif(ch==2):
+                  if(c==7):
+                     speak("Sorry You Lose\n")
+
+
+              elif(ch==3):
+                  if(c<7):
+                     account=account+credit*2 
+                     speak("Conrats! You won\n")
+                  else:
+                     account=account-credit
+                     speak("Sorry You Lose\n")
+
+              else:
+                  speak("wrong input")
+                  print("The balance is %d",account)
+                  speak("do you want to play more")
+
+              a=takeCommand().upper()
+        elif 'calculate' in query:
+             
+
+              r = sr.Recognizer()
+              my_mic_device = sr.Microphone()
+
+              with my_mic_device as source:
+                  speak("say what do you want to calculate, example two plus four")
+                  r.adjust_for_ambient_noise(source)
+                  audio = r.listen(source)
+
+
+              my_string=r.recognize_google(audio)
+              speak(my_string)
+              def get_operator_fn(op):
+
+                  return {
+                      '+' : operator.add,
+                      '-' : operator.sub,
+                      'x' : operator.mul,
+                      'divided' :operator.__truediv__,
+                      'Mod' : operator.mod,
+                      'mod' : operator.mod,
+                      '^' : operator.xor,
+                      }[op]
+
+              def eval_binary_expr(op1, oper, op2):
+               op1,op2 = int(op1), int(op2)
+               return get_operator_fn(oper)(op1, op2)
+              speak(eval_binary_expr(*(my_string.split())))  
